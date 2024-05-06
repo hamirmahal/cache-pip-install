@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Try to prevent "Cache folder path is retrieved for pip but doesn't exist on disk" "/home/runner/.cache/pip" error
+        run: mkdir -p /home/runner/.cache/pip
       - uses: actions/setup-python@v5
         with:
           cache: "pip"
