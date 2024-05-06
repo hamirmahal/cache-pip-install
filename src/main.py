@@ -1,3 +1,4 @@
+import tensorflow as tf  # type: ignore
 from utils.print_with_time import print_with_time
 
 VARIABLE_1 = {"a": 1, "b": 2, "c": 3}
@@ -28,3 +29,6 @@ print_with_time(
     "and",
     VARIABLE_12,
 )
+
+
+print_with_time("TensorFlow version:", tf.__version__)
