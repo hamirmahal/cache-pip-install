@@ -6,9 +6,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        id: setup-python
         with:
-          cache: "pip"
           python-version: "3.11"
 
-      - run: pip install -r requirements.txt
-      - run: python3 src/main.py
+      # https://github.com/actions/setup-python/issues/881#issuecomment-2147747696
+      # If Python upgrades, or if `requirements.txt` gets updated,
+      # the cache lookup will miss, and `venv` needs to be recreated.
+      # Never cache pip dependencies; cache virtual environments!
+      # Write the exact Python version to a file for cache-busting.
+      - run: echo "${{ steps.setup-python.outputs.python-version }}" > ".installed-python"
+      - uses: "actions/cache@v4"
+        id: "restore-cache"
+        with:
+          key: "venv-${{ hashFiles('.installed-python', 'requirements.txt') }}"
+          path: .venv/
+      - name: "Create a virtual environment"
+        if: steps.restore-cache.outputs.cache-hit == false
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip setuptools wheel
+          .venv/bin/python -m pip install -r requirements.txt
+      - run: .venv/bin/python src/main.py
